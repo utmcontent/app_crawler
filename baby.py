@@ -82,13 +82,11 @@ class Baby(object):
 
     def star_all_teachers(self,cid,uid):
         growlist = self.get_all_growth(cid=cid,filter='1,2')
-        print(growlist)
-        # results = []
-        # for i in range(6):
-        #     for item in growlist['body']['growuplist']:
-        #         results.append(self.un_star(item['mypointid'],item['archivesid'],item['childid']))
-        #         results.append(self.star(item['archivesid'],item['childid'],uid))
-        # return results
+        results = []
+        for item in growlist['body']['growuplist']:
+                results.append(self.un_star(item['mypointid'],item['archivesid'],item['childid']))
+                results.append(self.star(item['archivesid'],item['childid'],uid))
+        return results
 
     def post_grouth(self,textcontent,sid,cid):
         url="https://zths.szy.cn/ZTHServer/growup/add"
@@ -118,9 +116,8 @@ class Baby(object):
         start=time.time()
         uid=self.get_userid().get('body').get('userid')
         cid,stuid=self.get_childid()
-        # post_a_growth = self.post_grouth(random.choice(INSPIRE),stuid,cid)
-        # print(post_a_growth)
-        # self.dele_my_post_grouth(post_a_growth['body']['growthid']) # 添加删除成长记录
+        post_a_growth = self.post_grouth(random.choice(INSPIRE),stuid,cid)
+        self.dele_my_post_grouth(post_a_growth['body']['growthid']) # 添加删除成长记录
         print('点赞')
         print(self.star_all_teachers(cid,uid))# 取消并点赞所有老师
         end = time.time()
@@ -132,8 +129,8 @@ def save_login():
     with open('family_mumbers.txt','r') as f:
         for line in f.readlines():
             if line:
-                phone,passwd=line.strip().split(',')
-                login_user=login(phone,passwd)
+                phone,passwd,imei=line.strip().split(',')
+                login_user=login(phone,passwd,imei)
                 print(login_user)
                 sessionid=login_user.get('body').get('sessionid')
                 results.append(sessionid)
@@ -142,11 +139,21 @@ def save_login():
 
 
 
-def login(userphone,password):
+def login(userphone,password,imei):
     url='https://zths.szy.cn/login/parent/1000/v1.0'
 
-    data ='''{"password":"%s","apptype":1,"devkey":"b8fe01a2-ab90-4427-b15f-b25ffc44fddd","versionnum":"5.4.0","devtype":3,"logintype":"1","pwd2":"e10adc3949ba59abbe56e057f20f883e","account":"%s","release":"1","oemid":"1"}'''%(password,userphone)
-    return get_json(url,data=data)
+    data ='''{"password":"%s","apptype":1,"devkey":"%s","versionnum":"5.4.0","devtype":3,"logintype":"1","pwd2":"e10adc3949ba59abbe56e057f20f883e","account":"%s","release":"1","oemid":"1"}'''%(password,imei,userphone)
+    try:
+        response = requests.post(url,data=data,headers={'User-Agent':'zhang tong jia yuan/5.4.0(Android)','SVER':'3','Content-Type':'application/json;charset=utf-8'})
+        response.raise_for_status()
+        return json.loads(response.text)
+    except RequestException as err:
+            print(err)
+def post_valid():
+    url="https://zths.szy.cn/ZTHServer/sms"
+    data='reqcode=1030&reqcodeversion=5.3&body=%7B%7D'
+    headers={'User-Agent':'zhang tong jia yuan/5.4.0(Android)','SVER':'3','Content-Type':'application/x-www-form-urlencoded; charset=utf-8'}
+    ''' msg valid'''
 def main():
     '''
         # # 每天任务
@@ -165,6 +172,9 @@ def main():
     with open('passwd.pickle','rb') as f:
         session_list = pickle.load(f)
     tasks = [Baby(session) for session in session_list]
+
+    # for item in tasks:
+    #     item.start()
 
     p =Pool()
     print('Parent process %s.'%os.getpid())
