@@ -21,7 +21,7 @@ class Baby(object):
     def __init__(self,session):
         self.session={'JSESSIONID':session,'ClientVersion':'5.4.0'}
         self.headers={'User-Agent':'zhang tong jia yuan/5.4.0(Android)','SVER':'3','Content-Type':'application/json;charset=utf-8'}
-
+        self.start()
     def get_json(self,url,data="{}",headers=None):
         try:
             response = requests.post(url,data=data,headers=headers,cookies=self.session)
@@ -171,19 +171,16 @@ def main():
 
     with open('passwd.pickle','rb') as f:
         session_list = pickle.load(f)
-    tasks = [Baby(session) for session in session_list]
-
-    # for item in tasks:
-    #     item.start()
-
+    # tasks = [Baby(session) for session in session_list]
     p =Pool()
     print('Parent process %s.'%os.getpid())
-    for item in tasks:
-        p.apply_async(item.start)
-    print('Waiting for all subprocesses done..')
-    p.close()
-    p.join()
-    print('Done')
+    p.map(Baby,session_list)
+    # for item in tasks:
+    #     p.apply_async(item.start)
+    # print('Waiting for all subprocesses done..')
+    # p.close()
+    # p.join()
+    # print('Done')
 
 if __name__ =='__main__':
     main()
