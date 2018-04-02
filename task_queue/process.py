@@ -33,6 +33,7 @@ class TaskInterface(object):
             response = requests.post(url,data=data,headers=headers,cookies=self.session)
             response.raise_for_status()
             # print(response.request.headers)
+           
             return json.loads(response.text)
         except RequestException as err:
             print(err)
@@ -106,7 +107,7 @@ class Day_first(TaskInterface):
     return self.get_json(url,data=data)
 
 class Post_a_message(TaskInterface):
-  priority=3
+  priority=2
   name="post a message"
 
   def run(self):
@@ -132,7 +133,7 @@ class Post_a_message(TaskInterface):
     return self.get_json(url,data=data)
 
 class Star(TaskInterface):
-  priority=0
+  priority=3
   name="delete the message"
 
   def run(self):
@@ -163,3 +164,16 @@ class Star(TaskInterface):
     data['reqcodeversion']='5.3'
     data['body']='{"commentid":"%s","archivesid":"%s","childid":"%s"}'%(commentid,archivesid,childid)
     return self.get_json(url,data=data)
+
+class Talk(TaskInterface):
+  priority=2
+  name='给老师留言获取分数'
+
+  def afterTalk(self):
+    url="https://zths.szy.cn/ZTHServer/im/task"
+    data='''reqcode=1210&reqcodeversion=5.3&body=%7B%22groupid%22%3A%22%40TGS%23236JCEDFD%22%2C%22improvider%22%3A2%7D'''
+    return self.get_json(url,data=data) 
+  
+  def run(self):
+    r=self.afterTalk()
+    print(r)

@@ -14,7 +14,8 @@ class Tasks(object):
   def __loadtasks(self):
 
     for subclass in TaskInterface.__subclasses__():
-      self.task.put((subclass.priority,subclass.name,subclass,self.session))
+      if subclass.priority:
+        self.task.put((subclass.priority,subclass.name,subclass,self.session))
  
   def __start(self):
     self.task=PriorityQueue()
