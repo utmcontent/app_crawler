@@ -107,7 +107,9 @@ class Day_first(TaskInterface):
     return self.get_json(url,data=data)
 
 class Post_a_message(TaskInterface):
+
   priority=2
+
   name="post a message"
 
   def run(self):
